@@ -8,7 +8,7 @@ import { Home as HomeIcon, Calendar, Info, MapPin } from "lucide-react";
 const navItems = [
   { href: "/home", label: "Início", icon: HomeIcon },
   { href: "/horarios", label: "Horários", icon: Calendar },
-  { href: "/maps", label: "Mapa", icon: MapPin },
+  // { href: "/maps", label: "Rotas", icon: MapPin },
   { href: "/info", label: "Info", icon: Info },
 ];
 

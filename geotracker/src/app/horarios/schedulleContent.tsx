@@ -54,60 +54,80 @@ const extraSchedule = [
 export default function ScheduleContent() {
   return (
     <div className="px-4 pb-20 bg-white text-black min-h-screen">
-      <h1 className="text-3xl font-bold text-center py-6">
-        TABELA DE HORÁRIOS 2024
+      <h1 className="text-2xl font-bold text-center py-2">
+        TABELA DE HORÁRIOS
       </h1>
 
       <Tabs defaultValue="weekday" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4">
+        <TabsList
+          className="
+    flex
+    w-full
+    gap-2
+    overflow-x-auto
+    sm:overflow-x-visible
+    sm:grid
+    sm:grid-cols-3
+    mb-4
+  "
+        >
           <TabsTrigger
             value="weekday"
             className="
-              data-[state=active]:bg-blue-100
-              data-[state=active]:text-blue-600
-              data-[state=active]:font-semibold
-            "
+      whitespace-nowrap
+      data-[state=active]:bg-blue-100
+      data-[state=active]:text-blue-600
+      data-[state=active]:font-semibold
+    "
           >
-            SEGUNDA A SÁBADO
+            SEG - SAB
           </TabsTrigger>
           <TabsTrigger
             value="weekend"
             className="
-              data-[state=active]:bg-blue-100
-              data-[state=active]:text-blue-600
-              data-[state=active]:font-semibold
-            "
+      whitespace-nowrap
+      data-[state=active]:bg-blue-100
+      data-[state=active]:text-blue-600
+      data-[state=active]:font-semibold
+    "
           >
-            DOMINGOS E FERIADOS
+            DOM E FERI
           </TabsTrigger>
           <TabsTrigger
             value="extra"
             className="
-              data-[state=active]:bg-blue-100
-              data-[state=active]:text-blue-600
-              data-[state=active]:font-semibold
-            "
+      whitespace-nowrap
+      data-[state=active]:bg-blue-100
+      data-[state=active]:text-blue-600
+      data-[state=active]:font-semibold
+    "
           >
-            EXTRA (SEG - SEX)
+            EXTRA
           </TabsTrigger>
         </TabsList>
 
         {/* Conteúdo: SEG-SAB */}
         <TabsContent value="weekday">
-          <SchedulesCard title="SEG. A SÁB." scheduleData={weekdaySchedule} />
+          <SchedulesCard
+            title="SEGUNDA À SÁBADO"
+            scheduleData={weekdaySchedule}
+          />
         </TabsContent>
 
         {/* Conteúdo: DOM-FER */}
         <TabsContent value="weekend">
           <SchedulesCard
-            title="DOM. E FERIADOS"
+            title="DOMINGOS E FERIADOS"
             scheduleData={weekendSchedule}
           />
         </TabsContent>
 
         {/* Conteúdo: EXTRA */}
         <TabsContent value="extra">
-          <SchedulesCard title="CARRO EXTRA" scheduleData={extraSchedule} />
+          <SchedulesCard
+            title="EXTRA (SEGUNDA À SEXTA)"
+            scheduleData={extraSchedule}
+          />
         </TabsContent>
       </Tabs>
 

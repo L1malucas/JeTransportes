@@ -10,7 +10,7 @@ export default function Home() {
   const [busInfo] = useState({
     busId: "PSB-01",
     lastLocation: "Material de Construção",
-    lastUpdate: "2 minutos atrás",
+    lastUpdate: "19:18:33",
     direction: "Indo para o Condomínio",
     nextStop: "Condomínio PSB",
     status: "Em movimento",
@@ -19,33 +19,25 @@ export default function Home() {
   });
 
   return (
-    <div className="p-4 space-y-4">
+    <div>
       {/* Status Card */}
       <Card className="border-l-4 border-l-green-500">
+        {/* Cabeçalho do Card */}
         <CardHeader className="pb-2">
-          <CardTitle className="text-xl flex justify-between items-center">
-            <span>Ônibus {busInfo.busId}</span>
-            <span className="text-sm px-2 py-1 bg-green-100 text-green-800 rounded">
-              {busInfo.status}
-            </span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-1">
-            <div className="text-sm text-gray-600">
-              Horário programado: {busInfo.schedule}
-            </div>
+          <div className="flex items-center justify-between">
+            {/* Nome do Ônibus */}
+            <CardTitle className="text-xl">Ônibus {busInfo.busId}</CardTitle>
+            {/* Horário (schedule) */}
             <div className="inline-block text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
-              {busInfo.type}
+              {busInfo.schedule}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </CardHeader>
 
-      {/* Location Info */}
-      <Card>
-        <CardContent className="p-6">
+        {/* Conteúdo do Card */}
+        <CardContent>
           <div className="space-y-4">
+            {/* Última localização */}
             <div className="flex items-start gap-3">
               <MapPin className="h-5 w-5 text-blue-600 mt-1" />
               <div>
@@ -54,22 +46,49 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Último horário de atualização */}
             <div className="flex items-start gap-3">
               <Clock className="h-5 w-5 text-blue-600 mt-1" />
               <div>
-                <p className="text-sm text-gray-600">Atualizado</p>
+                <p className="text-sm text-gray-600">Última Atualização</p>
                 <p className="font-medium text-lg">{busInfo.lastUpdate}</p>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
 
+      <Card className="border-l-4 border-l-green-500">
+        {/* Cabeçalho do Card */}
+        <CardHeader className="pb-2">
+          <div className="flex items-center justify-between">
+            {/* Nome do Ônibus */}
+            <CardTitle className="text-xl">Van {busInfo.busId}</CardTitle>
+            {/* Horário (schedule) */}
+            <div className="inline-block text-xs px-2 py-1 bg-blue-100 text-blue-800 rounded">
+              {busInfo.schedule}
+            </div>
+          </div>
+        </CardHeader>
+
+        {/* Conteúdo do Card */}
+        <CardContent>
+          <div className="space-y-4">
+            {/* Última localização */}
             <div className="flex items-start gap-3">
-              <Navigation className="h-5 w-5 text-blue-600 mt-1" />
+              <MapPin className="h-5 w-5 text-blue-600 mt-1" />
               <div>
-                <p className="text-sm text-gray-600">Direção</p>
-                <p className="font-medium text-lg">{busInfo.direction}</p>
-                <p className="text-sm text-gray-500">
-                  Próxima parada: {busInfo.nextStop}
-                </p>
+                <p className="text-sm text-gray-600">Última localização</p>
+                <p className="font-medium text-lg">{busInfo.lastLocation}</p>
+              </div>
+            </div>
+
+            {/* Último horário de atualização */}
+            <div className="flex items-start gap-3">
+              <Clock className="h-5 w-5 text-blue-600 mt-1" />
+              <div>
+                <p className="text-sm text-gray-600">Última Atualização</p>
+                <p className="font-medium text-lg">{busInfo.lastUpdate}</p>
               </div>
             </div>
           </div>

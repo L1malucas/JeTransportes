@@ -1,47 +1,86 @@
 "use client";
 
 import React from "react";
-import { Phone, Mail, MessageSquare, Github } from "lucide-react";
+import { Phone, MessageSquare, Linkedin, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function InfoContent() {
   return (
-    <div className="pt-6 px-4 pb-6">
-      {/* Contato */}
-      <Card className="mb-4">
-        <CardHeader>
-          <CardTitle className="text-base">Contato do Desenvolvedor</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Phone className="h-5 w-5 text-gray-500" />
-              <div>
-                <p className="font-medium">Telefone/WhatsApp</p>
-                <p className="text-sm text-gray-600">(71) 98112-7022</p>
+    <div>
+      {/* Card do Proprietário - clicável para WhatsApp */}
+      <a
+        href="https://wa.me/5571981127022"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="no-underline"
+      >
+        <Card className="mb-4 hover:bg-gray-50 cursor-pointer">
+          <CardHeader>
+            <CardTitle className="text-base">Contato do Proprietário</CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <User className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="font-medium">Nome</p>
+                  <p className="text-sm text-gray-600">
+                    Ari - Proprietário do J&E Transportes
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Phone className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="font-medium">Telefone/WhatsApp</p>
+                  <p className="text-sm text-gray-600">(71) 98112-7022</p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5 text-gray-500" />
-              <div>
-                <p className="font-medium">Email</p>
-                <p className="text-sm text-gray-600">
-                  contato@jetransportes.com.br
-                </p>
+          </CardContent>
+        </Card>
+      </a>
+
+      {/* Card do Desenvolvedor - clicável para LinkedIn */}
+      <a
+        href="https://www.linkedin.com/in/lucasl1ma/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="no-underline"
+      >
+        <Card className="mb-4 hover:bg-gray-50 cursor-pointer">
+          <CardHeader>
+            <CardTitle className="text-base">
+              Contato do Desenvolvedor
+            </CardTitle>
+          </CardHeader>
+
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <User className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="font-medium">Nome</p>
+                  <p className="text-sm text-gray-600">
+                    Lucas Lima - Engenheiro de Software
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <Linkedin className="h-5 w-5 text-gray-500" />
+                <div>
+                  <p className="font-medium">Contato (Linkedin)</p>
+                  <p className="text-sm text-gray-600">
+                    linkedin.com/in/lucasl1ma/
+                  </p>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
-              <Github className="h-5 w-5 text-gray-500" />
-              <div>
-                <p className="font-medium">GitHub</p>
-                <p className="text-sm text-gray-600">
-                  github.com/jetransportes
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </a>
 
       {/* Sugestões */}
       <Card>
