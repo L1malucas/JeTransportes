@@ -39,7 +39,7 @@ export function SchedulesLegend() {
             <span className="bg-yellow-500 text-black px-2 py-1 rounded text-xs">
               AMARELO
             </span>
-            <span>MC DONALD'S para PSB (Via Rua do Canal)</span>
+            <span>MC DONALDS para PSB (Via Rua do Canal)</span>
           </div>
           <div className="flex items-center gap-2">
             <span className="bg-white text-black px-2 py-1 rounded text-xs border border-gray-300">

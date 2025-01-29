@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home as HomeIcon, Calendar, Info, MapPin } from "lucide-react";
+import { Home as HomeIcon, Calendar, Info } from "lucide-react";
 
 const navItems = [
   { href: "/home", label: "Início", icon: HomeIcon },
