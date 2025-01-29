@@ -4,7 +4,7 @@ import { Play, Pause, Clock } from "lucide-react-native";
 import { styles } from "./styles/styles";
 import useLocationTracker from "./hooks/useCurrentLocation";
 import LocationTrackerCard from "./components/locationInfoCard";
-import { formatTime } from "./utils/TimeInput";
+import { formatTime } from "./utils/timeInput";
 
 const WorkTrackingApp: React.FC = () => {
   const [vehicleType, setVehicleType] = useState("");
@@ -19,11 +19,8 @@ const WorkTrackingApp: React.FC = () => {
       trackingDurationMs: 200000,
     });
 
-  // Button should only show if:
-  // - "Tempo Real": vehicleType is filled.
   const canStartStop = vehicleType.trim() !== "";
 
-  // - "Agendar": vehicleType, startTime, and endTime are all filled.
   const canSchedule =
     vehicleType.trim() !== "" &&
     startTime.trim() !== "" &&
@@ -40,13 +37,11 @@ const WorkTrackingApp: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    // In this demo, we just toggle isTracking on submit
     setIsTracking(!isTracking);
   };
 
   return (
     <View style={styles.container}>
-      {/* Display location info card */}
       <LocationTrackerCard
         currentAddress={currentAddress}
         loadingLocation={loadingLocation}
@@ -54,11 +49,9 @@ const WorkTrackingApp: React.FC = () => {
         lastUpdatedTime={lastUpdatedTime}
       />
 
-      {/* Main card for user input */}
       <View style={styles.card}>
         <Text style={styles.title}>Iniciar as Viagens</Text>
 
-        {/* Vehicle type */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Digite o tipo do veículo</Text>
           <TextInput
@@ -69,7 +62,6 @@ const WorkTrackingApp: React.FC = () => {
           />
         </View>
 
-        {/* Toggle between Tempo Real and Agendar */}
         <View style={styles.toggleGroup}>
           <TouchableOpacity
             onPress={() => setShowSchedule(false)}
@@ -101,10 +93,8 @@ const WorkTrackingApp: React.FC = () => {
           </TouchableOpacity>
         </View>
 
-        {/* If "Agendar" mode is selected */}
         {showSchedule ? (
           <View>
-            {/* Start time */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Horário de Início</Text>
               <TextInput
@@ -117,7 +107,6 @@ const WorkTrackingApp: React.FC = () => {
               />
             </View>
 
-            {/* End time */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Horário de Término</Text>
               <TextInput
@@ -130,7 +119,6 @@ const WorkTrackingApp: React.FC = () => {
               />
             </View>
 
-            {/* Show button ONLY if all fields are filled */}
             {canSchedule && (
               <TouchableOpacity
                 onPress={handleSubmit}
@@ -142,7 +130,6 @@ const WorkTrackingApp: React.FC = () => {
             )}
           </View>
         ) : (
-          // "Tempo Real" mode. Show button ONLY if vehicleType is filled
           canStartStop && (
             <TouchableOpacity
               onPress={handleSubmit}
