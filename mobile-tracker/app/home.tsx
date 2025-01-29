@@ -1,69 +1,22 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
-import * as Location from "expo-location";
+import React, { useState } from "react";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Play, Pause, Clock } from "lucide-react-native";
 import { styles } from "./styles/styles";
+import useLocationTracker from "./hooks/useCurrentLocation";
+import LocationTrackerCard from "./components/locationInfoCard";
 
 const WorkTrackingApp: React.FC = () => {
-  const [name, setName] = useState<string>("");
-  const [isTracking, setIsTracking] = useState<boolean>(false);
-  const [showSchedule, setShowSchedule] = useState<boolean>(false);
-  const [startTime, setStartTime] = useState<string>("");
-  const [endTime, setEndTime] = useState<string>("");
+  const [vehicleType, setVehicleType] = useState("");
+  const [isTracking, setIsTracking] = useState(false);
+  const [showSchedule, setShowSchedule] = useState(false);
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
 
-  const [currentAddress, setCurrentAddress] = useState<string | null>(null);
-  const [loadingLocation, setLoadingLocation] = useState<boolean>(true);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        console.log("Iniciando solicitação de permissão de localização...");
-        const { status } = await Location.requestForegroundPermissionsAsync();
-        console.log("Status da permissão:", status);
-
-        if (status !== "granted") {
-          console.log("Permissão negada pelo usuário");
-          setCurrentAddress("Permissão para acessar localização foi negada.");
-          setLoadingLocation(false);
-          return;
-        }
-
-        console.log("Obtendo posição atual...");
-        const location = await Location.getCurrentPositionAsync({});
-        const { latitude, longitude } = location.coords;
-        console.log("Coordenadas obtidas:", { latitude, longitude });
-
-        console.log("Convertendo coordenadas em endereço...");
-        const reverseGeocode = await Location.reverseGeocodeAsync({
-          latitude,
-          longitude,
-        });
-
-        if (reverseGeocode.length > 0) {
-          const address = reverseGeocode[0];
-          console.log("Endereço encontrado:", address);
-          setCurrentAddress(
-            `${address.street}, ${address.streetNumber} - ${address.district}`
-          );
-        } else {
-          console.log("Nenhum endereço encontrado para as coordenadas");
-          setCurrentAddress("Endereço não encontrado.");
-        }
-      } catch (error) {
-        console.error("Erro durante o processo de localização:", error);
-        setCurrentAddress("Falha ao obter localização.");
-      } finally {
-        console.log("Processo de localização finalizado");
-        setLoadingLocation(false);
-      }
-    })();
-  }, []);
+  const { currentAddress, loadingLocation, gpsEnabled, lastUpdatedTime } =
+    useLocationTracker({
+      updateIntervalMs: 10000,
+      trackingDurationMs: 200000,
+    });
 
   const handleSubmit = () => {
     setIsTracking(!isTracking);
@@ -71,21 +24,19 @@ const WorkTrackingApp: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Meu local atual</Text>
-      {loadingLocation ? (
-        <ActivityIndicator size="large" color="#2563eb" />
-      ) : (
-        <Text style={styles.address}>{currentAddress}</Text>
-      )}
-
+      <LocationTrackerCard
+        currentAddress={currentAddress}
+        loadingLocation={loadingLocation}
+        gpsEnabled={gpsEnabled}
+        lastUpdatedTime={lastUpdatedTime}
+      />
       <View style={styles.card}>
         <Text style={styles.title}>Iniciar as Viagens</Text>
-
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Digite o tipo do veículo</Text>
           <TextInput
-            value={name}
-            onChangeText={setName}
+            value={vehicleType}
+            onChangeText={setVehicleType}
             style={styles.input}
             placeholder="Ex.: Ônibus, Van, Micro-ônibus"
           />
@@ -106,6 +57,7 @@ const WorkTrackingApp: React.FC = () => {
               Tempo Real
             </Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             onPress={() => setShowSchedule(true)}
             style={[
@@ -133,6 +85,7 @@ const WorkTrackingApp: React.FC = () => {
                 keyboardType="numeric"
               />
             </View>
+
             <View style={styles.inputGroup}>
               <Text style={styles.label}>Horário de Término</Text>
               <TextInput

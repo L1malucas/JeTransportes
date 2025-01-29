@@ -10,26 +10,92 @@ export const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#f3f4f6",
     padding: 16,
-    justifyContent: "center", // Add this
-    alignItems: "center", // Add this
+    justifyContent: "center",
+    alignItems: "center",
   },
   card: {
+    marginBottom: 16,
     backgroundColor: "#fff",
     borderRadius: 16,
     padding: 20,
     shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
-    width: "100%", // Add this
-    maxWidth: 400, // Add this to limit the card width
+    width: "100%",
+    maxWidth: 400,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    gap: 8,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    textAlign: "center",
-    marginBottom: 16,
     color: "#333",
+  },
+  warningContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fee2e2",
+    padding: 12,
+    borderRadius: 8,
+    gap: 12,
+  },
+  warningTextContainer: {
+    flex: 1,
+  },
+  warningText: {
+    color: "#dc2626",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  loadingContainer: {
+    alignItems: "center",
+    padding: 20,
+    gap: 12,
+  },
+  loadingText: {
+    color: "#6b7280",
+    fontSize: 16,
+  },
+  contentContainer: {
+    gap: 16,
+  },
+  addressContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    backgroundColor: "#f3f4f6",
+    padding: 12,
+    borderRadius: 8,
+  },
+  addressText: {
+    flex: 1,
+    fontSize: 16,
+    color: "#4b5563",
+    lineHeight: 24,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#e5e7eb",
+    marginVertical: 8,
+  },
+  timestampContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  timestampText: {
+    color: "#6b7280",
+    fontSize: 14,
   },
   inputGroup: {
     marginBottom: 16,
