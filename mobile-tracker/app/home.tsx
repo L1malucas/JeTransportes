@@ -16,7 +16,7 @@ const WorkTrackingApp: React.FC = () => {
   const { currentAddress, loadingLocation, gpsEnabled, lastUpdatedTime } =
     useLocationTracker({
       updateIntervalMs: 10000,
-      trackingDurationMs: 200000,
+      trackingDurationMs: 200000, 
     });
 
   const canStartStop = vehicleType.trim() !== "";
