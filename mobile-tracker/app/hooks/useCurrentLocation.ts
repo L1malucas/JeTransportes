@@ -17,6 +17,8 @@ export default function useLocationTracker({
   const [loadingLocation, setLoadingLocation] = useState<boolean>(true);
   const [gpsEnabled, setGpsEnabled] = useState<boolean>(true);
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string>("");
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
 
   const watchSubscription = useRef<Location.LocationSubscription | null>(null);
   const trackingTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -77,16 +79,19 @@ export default function useLocationTracker({
           {
             accuracy: Location.Accuracy.Highest,
             timeInterval: updateIntervalMs,
-            distanceInterval: 0,
+            distanceInterval: 0, // Não é necessário que a posição mude para disparar a atualização
           },
           async (location) => {
             if (!isMounted) return;
 
             try {
-              const { latitude, longitude } = location.coords;
+              const { latitude: lat, longitude: lon } = location.coords;
+              setLatitude(lat);
+              setLongitude(lon);
+
               const reverseGeocode = await Location.reverseGeocodeAsync({
-                latitude,
-                longitude,
+                latitude: lat,
+                longitude: lon,
               });
               if (reverseGeocode.length > 0) {
                 const address = reverseGeocode[0];
@@ -99,7 +104,8 @@ export default function useLocationTracker({
 
               setLastUpdatedTime(new Date().toLocaleTimeString());
 
-              await sendLocation(latitude, longitude);
+              // Enviar a localização ao servidor toda vez que for atualizada
+              sendLocation(lat, lon);
             } catch (error) {
               console.log("Error in location watcher:", error);
             } finally {
@@ -149,5 +155,12 @@ export default function useLocationTracker({
     };
   }, [gpsEnabled, updateIntervalMs, trackingDurationMs]);
 
-  return { currentAddress, loadingLocation, gpsEnabled, lastUpdatedTime };
+  return {
+    currentAddress,
+    loadingLocation,
+    gpsEnabled,
+    lastUpdatedTime,
+    latitude,
+    longitude,
+  };
 }

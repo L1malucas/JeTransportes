@@ -1,10 +1,3 @@
-export default async function sendLocation(
-  latitude: number,
-  longitude: number
-) {
-  // This function will be implemented in the next step
-}
-
 import { io } from "socket.io-client";
 
 const socket = io("http://192.168.1.106:3001");
@@ -25,7 +18,6 @@ export const sendLocationToServer = (
     vehicleType,
     lastUpdatedTime,
   });
-
   socket.emit("location", {
     latitude,
     longitude,
