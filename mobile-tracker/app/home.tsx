@@ -3,8 +3,9 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Play, Pause, Clock } from "lucide-react-native";
 import { styles } from "./styles/styles";
 import useLocationTracker from "./hooks/useCurrentLocation";
-import LocationTrackerCard from "./components/locationInfoCard";
+import LocationTrackerCard from "./components/LocationTrackerCard";
 import { formatTime } from "./utils/timeInput";
+import { sendLocationToServer } from "./services/sendLocation";
 
 const WorkTrackingApp: React.FC = () => {
   const [vehicleType, setVehicleType] = useState("");
@@ -13,14 +14,19 @@ const WorkTrackingApp: React.FC = () => {
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
 
-  const { currentAddress, loadingLocation, gpsEnabled, lastUpdatedTime } =
-    useLocationTracker({
-      updateIntervalMs: 10000,
-      trackingDurationMs: 200000, 
-    });
+  const {
+    currentAddress,
+    loadingLocation,
+    gpsEnabled,
+    lastUpdatedTime,
+    latitude,
+    longitude,
+  } = useLocationTracker({
+    updateIntervalMs: 50000,
+    trackingDurationMs: 200000,
+  });
 
   const canStartStop = vehicleType.trim() !== "";
-
   const canSchedule =
     vehicleType.trim() !== "" &&
     startTime.trim() !== "" &&
@@ -38,6 +44,15 @@ const WorkTrackingApp: React.FC = () => {
 
   const handleSubmit = () => {
     setIsTracking(!isTracking);
+    if (vehicleType && latitude && longitude) {
+      sendLocationToServer(
+        latitude,
+        longitude,
+        currentAddress,
+        vehicleType,
+        lastUpdatedTime
+      );
+    }
   };
 
   return (
