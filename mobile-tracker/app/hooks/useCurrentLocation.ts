@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import * as Location from "expo-location";
-import sendLocation from "../services/sendLocation";
+import { sendLocationToServer } from "../services/sendLocation";
 
 interface UseLocationTrackerOptions {
   updateIntervalMs?: number;
@@ -48,14 +48,12 @@ export default function useLocationTracker({
 
         setGpsEnabled(true);
       } catch (error) {
-        console.log("Error checking location status:", error);
         setGpsEnabled(false);
         setLoadingLocation(false);
       }
     };
 
     checkLocationStatus();
-
     const intervalId = setInterval(checkLocationStatus, checkStatusIntervalMs);
 
     return () => {
@@ -79,19 +77,16 @@ export default function useLocationTracker({
           {
             accuracy: Location.Accuracy.Highest,
             timeInterval: updateIntervalMs,
-            distanceInterval: 0, // Não é necessário que a posição mude para disparar a atualização
+            distanceInterval: 0,
           },
           async (location) => {
             if (!isMounted) return;
 
             try {
-              const { latitude: lat, longitude: lon } = location.coords;
-              setLatitude(lat);
-              setLongitude(lon);
-
+              const { latitude, longitude } = location.coords;
               const reverseGeocode = await Location.reverseGeocodeAsync({
-                latitude: lat,
-                longitude: lon,
+                latitude,
+                longitude,
               });
               if (reverseGeocode.length > 0) {
                 const address = reverseGeocode[0];
@@ -102,10 +97,18 @@ export default function useLocationTracker({
                 setCurrentAddress("Endereço não encontrado.");
               }
 
+              setLatitude(latitude);
+              setLongitude(longitude);
               setLastUpdatedTime(new Date().toLocaleTimeString());
 
-              // Enviar a localização ao servidor toda vez que for atualizada
-              sendLocation(lat, lon);
+              // Enviar sempre, mesmo que os dados não tenham mudado
+              sendLocationToServer(
+                latitude,
+                longitude,
+                currentAddress || "Endereço não disponível",
+                "", // Se o tipo de veículo não estiver preenchido, enviar uma string vazia
+                lastUpdatedTime
+              );
             } catch (error) {
               console.log("Error in location watcher:", error);
             } finally {

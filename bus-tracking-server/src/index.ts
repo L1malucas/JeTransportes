@@ -7,50 +7,47 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*", // Allow all origins
+    origin: [
+      "http://localhost:3000",
+      "http://192.168.1.106:3000",
+      "https://je-transportes.vercel.app/",
+    ], // Allow both localhost and IP
     methods: ["GET", "POST"],
+    credentials: true,
+    allowedHeaders: ["my-custom-header"],
   },
+  allowEIO3: true, // Enable compatibility with Socket.IO v3 clients
+  transports: ["websocket", "polling"], // Enable both WebSocket and polling transport
 });
 
-// Função para obter timestamp atual
 const getTimestamp = () => new Date().toLocaleString();
-
-// Armazenando os dados do usuário
-const userData = new Map<string, any>(); // Mapa para armazenar os dados de cada usuário (socket.id -> informações do usuário)
+const userData = new Map<string, any>();
 
 io.on("connection", (socket) => {
   console.log(`[${getTimestamp()}] Usuário conectado:`, socket.id);
 
-  // Evento para receber a localização e outras informações
   socket.on("location", (data) => {
     console.log(`[${getTimestamp()}] Localização recebida do cliente:`, data);
-
-    // Salvar os dados do usuário no mapa
-    userData.set(socket.id, {
-      latitude: data.latitude,
-      longitude: data.longitude,
-      currentAddress: data.currentAddress,
-      vehicleType: data.vehicleType,
-      lastUpdatedTime: data.lastUpdatedTime,
-    });
-
-    // Emitir as informações para todos os outros clientes
+    userData.set(socket.id, data);
     io.emit("locationUpdate", data);
-
-    // Exibir as informações de localização com dados adicionais
     console.log(
       `[${getTimestamp()}] Informações do usuário ${socket.id}:`,
       userData.get(socket.id)
     );
   });
 
-  // Evento de desconexão
   socket.on("disconnect", () => {
     console.log(`[${getTimestamp()}] Usuário desconectado:`, socket.id);
-
-    // Remover os dados do usuário quando ele desconectar
     userData.delete(socket.id);
   });
+});
+
+// Add basic Express middleware to handle CORS pre-flight requests
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  next();
 });
 
 server.listen(3001, "0.0.0.0", () => {

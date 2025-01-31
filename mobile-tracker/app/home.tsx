@@ -45,12 +45,13 @@ const WorkTrackingApp: React.FC = () => {
   const handleSubmit = () => {
     setIsTracking(!isTracking);
     if (vehicleType && latitude && longitude) {
+      // Se vehicleType estiver vazio, passar um valor default "Desconhecido"
       sendLocationToServer(
         latitude,
         longitude,
         currentAddress,
-        vehicleType,
-        lastUpdatedTime
+        vehicleType || "Desconhecido", // Garantindo que nunca envie um campo vazio ou nulo
+        lastUpdatedTime || new Date().toLocaleTimeString() // Garantir que o lastUpdatedTime não seja nulo
       );
     }
   };
