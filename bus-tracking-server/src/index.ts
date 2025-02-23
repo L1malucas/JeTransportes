@@ -1,55 +1,72 @@
 import express from "express";
 import http from "http";
 import { Server } from "socket.io";
+import { instrument } from "@socket.io/admin-ui";
 
 const app = express();
+app.use(express.static("./node_modules/@socket.io/admin-ui/ui/dist"));
 const server = http.createServer(app);
-
-const io = new Server(server, {
+const expressServer = app.listen(4001);
+const io = new Server(expressServer, {
   cors: {
-    origin: [
-      "http://localhost:3000",
-      "http://192.168.1.106:3000",
-      "https://je-transportes.vercel.app/",
-    ], // Allow both localhost and IP
-    methods: ["GET", "POST"],
+    origin: ["*"],
     credentials: true,
-    allowedHeaders: ["my-custom-header"],
   },
-  allowEIO3: true, // Enable compatibility with Socket.IO v3 clients
-  transports: ["websocket", "polling"], // Enable both WebSocket and polling transport
+});
+
+instrument(io, {
+  auth: false,
+  mode: "development",
 });
 
 const getTimestamp = () => new Date().toLocaleString();
-const userData = new Map<string, any>();
 
+const userData = new Map();
+
+// Handling new client connection
 io.on("connection", (socket) => {
   console.log(`[${getTimestamp()}] Usuário conectado:`, socket.id);
 
   socket.on("location", (data) => {
-    console.log(`[${getTimestamp()}] Localização recebida do cliente:`, data);
-    userData.set(socket.id, data);
-    io.emit("locationUpdate", data);
     console.log(
-      `[${getTimestamp()}] Informações do usuário ${socket.id}:`,
-      userData.get(socket.id)
+      `[${getTimestamp()}] Localização recebida do cliente ${data.clientId}:`,
+      data
+    );
+
+    // Save/update user data by clientId
+    userData.set(data.clientId, {
+      latitude: data.latitude,
+      longitude: data.longitude,
+      currentAddress: data.currentAddress,
+      vehicleType: data.vehicleType,
+      lastUpdatedTime: data.lastUpdatedTime,
+    });
+
+    // Emit the location update to all clients
+    io.emit("locationUpdate", data);
+
+    console.log(
+      `[${getTimestamp()}] Nova atualização de localização recebida para o cliente ${
+        data.clientId
+      }:`,
+      {
+        latitude: data.latitude,
+        longitude: data.longitude,
+        currentAddress: data.currentAddress,
+        vehicleType: data.vehicleType,
+        lastUpdatedTime: data.lastUpdatedTime,
+      }
     );
   });
 
   socket.on("disconnect", () => {
     console.log(`[${getTimestamp()}] Usuário desconectado:`, socket.id);
+    // Optionally, remove the client from the userData map if necessary
     userData.delete(socket.id);
   });
 });
 
-// Add basic Express middleware to handle CORS pre-flight requests
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "http://localhost:3000");
-  res.header("Access-Control-Allow-Methods", "GET,PUT,POST,DELETE");
-  res.header("Access-Control-Allow-Headers", "Content-Type");
-  next();
-});
-
-server.listen(3001, "0.0.0.0", () => {
+// Listening on port 3001
+app.listen(3001, "0.0.0.0", () => {
   console.log(`[${getTimestamp()}] Servidor rodando na porta 3001`);
 });

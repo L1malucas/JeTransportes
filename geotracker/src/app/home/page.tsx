@@ -18,24 +18,11 @@ export default function Home() {
   const [clientsInfo, setClientsInfo] = useState<any>({});
 
   useEffect(() => {
-    // Add connection event handlers
-    socket.on("connect", () => {
-      console.log("Connected to Socket.IO server");
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error("Socket connection error:", error);
-    });
-
-    // Handle the location update event
     socket.on("locationUpdate", (data) => {
       const { clientId, vehicleType, currentAddress, lastUpdatedTime } = data;
 
-      // Update the information for the specific clientId
       setClientsInfo((prevState: any) => {
         const updatedClients = { ...prevState };
-
-        // Initialize client if not already initialized
         if (!updatedClients[clientId]) {
           updatedClients[clientId] = {
             vehicleType: "",
@@ -43,14 +30,12 @@ export default function Home() {
             lastUpdatedTime: "",
           };
         }
-
-        // Update the existing client data
         updatedClients[clientId] = {
-          vehicleType: vehicleType || updatedClients[clientId].vehicleType, // Update vehicleType only if present in the data
+          vehicleType: vehicleType || updatedClients[clientId].vehicleType,
           currentAddress:
-            currentAddress || updatedClients[clientId].currentAddress, // Update address if present
+            currentAddress || updatedClients[clientId].currentAddress,
           lastUpdatedTime:
-            lastUpdatedTime || updatedClients[clientId].lastUpdatedTime, // Update lastUpdatedTime if present
+            lastUpdatedTime || updatedClients[clientId].lastUpdatedTime,
         };
 
         return updatedClients;
@@ -85,7 +70,7 @@ export default function Home() {
             <CardHeader className="pb-2">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl">
-                  Cliente {clientId} - {clientData.vehicleType}
+                  {clientData.vehicleType}
                 </CardTitle>
               </div>
             </CardHeader>
