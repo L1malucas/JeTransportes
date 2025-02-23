@@ -2,10 +2,10 @@ import * as Location from "expo-location";
 import { LocationObject } from "expo-location";
 
 // Check if GPS is enabled and permissions are granted
-export const checkLocationStatus = async (): Promise<{
+export default async function checkLocationStatus(): Promise<{
   gpsEnabled: boolean;
   error: string | null;
-}> => {
+}> {
   try {
     const servicesEnabled = await Location.hasServicesEnabledAsync();
     if (!servicesEnabled) {
@@ -22,7 +22,7 @@ export const checkLocationStatus = async (): Promise<{
     console.log("Error checking location status:", error);
     return { gpsEnabled: false, error: "Error checking location status" };
   }
-};
+}
 
 // Watch the user's location and return it
 export const startLocationWatch = async (

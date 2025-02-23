@@ -1,169 +1,101 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import * as Location from "expo-location";
-import { sendLocationToServer } from "../services/sendLocation";
+import sendLocationToServer from "../services/socketService";
 
 interface UseLocationTrackerOptions {
   updateIntervalMs?: number;
-  trackingDurationMs?: number;
   checkStatusIntervalMs?: number;
+  vehicleType: string;
+  isTracking: boolean; // Added isTracking as parameter
 }
 
 export default function useLocationTracker({
   updateIntervalMs = 30000,
-  trackingDurationMs = 0,
   checkStatusIntervalMs = 5000,
+  vehicleType,
+  isTracking, // Received isTracking to control sending data
 }: UseLocationTrackerOptions) {
-  const [currentAddress, setCurrentAddress] = useState<string | null>(null);
-  const [loadingLocation, setLoadingLocation] = useState<boolean>(true);
-  const [gpsEnabled, setGpsEnabled] = useState<boolean>(true);
+  const [currentAddress, setCurrentAddress] = useState<string>("");
+  const [latitude, setLatitude] = useState<number>(0);
+  const [longitude, setLongitude] = useState<number>(0);
   const [lastUpdatedTime, setLastUpdatedTime] = useState<string>("");
-  const [latitude, setLatitude] = useState<number | null>(null);
-  const [longitude, setLongitude] = useState<number | null>(null);
-
-  const watchSubscription = useRef<Location.LocationSubscription | null>(null);
-  const trackingTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [gpsEnabled, setGpsEnabled] = useState<boolean>(true);
+  const [loadingLocation, setLoadingLocation] = useState<boolean>(false);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const checkLocationStatus = async () => {
-      if (!isMounted) return;
-
-      setLastUpdatedTime(new Date().toLocaleTimeString());
-
+    const intervalId = setInterval(async () => {
+      setLoadingLocation(true);
       try {
         const servicesEnabled = await Location.hasServicesEnabledAsync();
         if (!servicesEnabled) {
           setGpsEnabled(false);
-          setLoadingLocation(false);
           return;
         }
 
         const { status } = await Location.getForegroundPermissionsAsync();
         if (status !== "granted") {
           setGpsEnabled(false);
-          setLoadingLocation(false);
           return;
         }
 
         setGpsEnabled(true);
-      } catch (error) {
-        setGpsEnabled(false);
-        setLoadingLocation(false);
-      }
-    };
 
-    checkLocationStatus();
-    const intervalId = setInterval(checkLocationStatus, checkStatusIntervalMs);
+        const location = await Location.getCurrentPositionAsync({
+          accuracy: Location.Accuracy.High,
+        });
 
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-    };
-  }, [checkStatusIntervalMs]);
+        const { latitude, longitude } = location.coords;
+        setLatitude(latitude);
+        setLongitude(longitude);
+        setLastUpdatedTime(new Date().toLocaleTimeString());
 
-  useEffect(() => {
-    let isMounted = true;
+        const reverseGeocode = await Location.reverseGeocodeAsync({
+          latitude,
+          longitude,
+        });
 
-    const startWatchingLocation = async () => {
-      try {
-        if (watchSubscription.current) {
-          watchSubscription.current.remove();
-          watchSubscription.current = null;
+        if (reverseGeocode.length > 0) {
+          const address = reverseGeocode[0];
+          setCurrentAddress(
+            `${address.street}, ${address.streetNumber} - ${address.district}`
+          );
+        } else {
+          setCurrentAddress("Endereço não encontrado.");
         }
 
-        setLoadingLocation(true);
-        watchSubscription.current = await Location.watchPositionAsync(
-          {
-            accuracy: Location.Accuracy.Highest,
-            timeInterval: updateIntervalMs,
-            distanceInterval: 0,
-          },
-          async (location) => {
-            if (!isMounted) return;
-
-            try {
-              const { latitude, longitude } = location.coords;
-              const reverseGeocode = await Location.reverseGeocodeAsync({
-                latitude,
-                longitude,
-              });
-              if (reverseGeocode.length > 0) {
-                const address = reverseGeocode[0];
-                setCurrentAddress(
-                  `${address.street}, ${address.streetNumber} - ${address.district}`
-                );
-              } else {
-                setCurrentAddress("Endereço não encontrado.");
-              }
-
-              setLatitude(latitude);
-              setLongitude(longitude);
-              setLastUpdatedTime(new Date().toLocaleTimeString());
-
-              // Enviar sempre, mesmo que os dados não tenham mudado
-              sendLocationToServer(
-                latitude,
-                longitude,
-                currentAddress || "Endereço não disponível",
-                "", // Se o tipo de veículo não estiver preenchido, enviar uma string vazia
-                lastUpdatedTime
-              );
-            } catch (error) {
-              console.log("Error in location watcher:", error);
-            } finally {
-              setLoadingLocation(false);
-            }
-          }
-        );
-
-        if (trackingDurationMs > 0) {
-          trackingTimeout.current = setTimeout(() => {
-            if (watchSubscription.current) {
-              watchSubscription.current.remove();
-              watchSubscription.current = null;
-            }
-          }, trackingDurationMs);
+        // Send location data only if tracking is active
+        if (isTracking && gpsEnabled) {
+          sendLocationToServer(
+            latitude,
+            longitude,
+            currentAddress || "Endereço não disponível",
+            vehicleType, // Pass the vehicleType
+            lastUpdatedTime
+          );
         }
       } catch (error) {
-        console.log("Error starting location watch:", error);
+        console.log("Erro ao obter localização:", error);
+      } finally {
         setLoadingLocation(false);
       }
-    };
+    }, checkStatusIntervalMs);
 
-    if (gpsEnabled) {
-      startWatchingLocation();
-    } else {
-      if (watchSubscription.current) {
-        watchSubscription.current.remove();
-        watchSubscription.current = null;
-      }
-      if (trackingTimeout.current) {
-        clearTimeout(trackingTimeout.current);
-        trackingTimeout.current = null;
-      }
-      setLoadingLocation(false);
-    }
-
-    return () => {
-      isMounted = false;
-      if (watchSubscription.current) {
-        watchSubscription.current.remove();
-        watchSubscription.current = null;
-      }
-      if (trackingTimeout.current) {
-        clearTimeout(trackingTimeout.current);
-        trackingTimeout.current = null;
-      }
-    };
-  }, [gpsEnabled, updateIntervalMs, trackingDurationMs]);
+    return () => clearInterval(intervalId);
+  }, [
+    checkStatusIntervalMs,
+    currentAddress,
+    gpsEnabled,
+    lastUpdatedTime,
+    vehicleType,
+    isTracking, // Ensure it checks tracking status
+  ]);
 
   return {
     currentAddress,
-    loadingLocation,
-    gpsEnabled,
-    lastUpdatedTime,
     latitude,
     longitude,
+    lastUpdatedTime,
+    gpsEnabled,
+    loadingLocation,
   };
 }

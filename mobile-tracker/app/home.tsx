@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Play, Pause, Clock } from "lucide-react-native";
 import { styles } from "./styles/styles";
 import useLocationTracker from "./hooks/useCurrentLocation";
 import LocationTrackerCard from "./components/LocationTrackerCard";
-import { formatTime } from "./utils/timeInput";
-import { sendLocationToServer } from "./services/sendLocation";
+import formatTime from "./utils/timeInput";
+import sendLocationToServer from "./services/socketService"; // Updated to include clientId
 
 const WorkTrackingApp: React.FC = () => {
   const [vehicleType, setVehicleType] = useState("");
@@ -13,6 +13,8 @@ const WorkTrackingApp: React.FC = () => {
   const [showSchedule, setShowSchedule] = useState(false);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [locationUpdateInterval, setLocationUpdateInterval] =
+    useState<NodeJS.Timeout | null>(null);
 
   const {
     currentAddress,
@@ -22,8 +24,10 @@ const WorkTrackingApp: React.FC = () => {
     latitude,
     longitude,
   } = useLocationTracker({
-    updateIntervalMs: 50000,
-    trackingDurationMs: 200000,
+    updateIntervalMs: 30000,
+    checkStatusIntervalMs: 5000,
+    vehicleType,
+    isTracking, 
   });
 
   const canStartStop = vehicleType.trim() !== "";
@@ -43,18 +47,50 @@ const WorkTrackingApp: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    setIsTracking(!isTracking);
-    if (vehicleType && latitude && longitude) {
-      // Se vehicleType estiver vazio, passar um valor default "Desconhecido"
-      sendLocationToServer(
-        latitude,
-        longitude,
-        currentAddress,
-        vehicleType || "Desconhecido", // Garantindo que nunca envie um campo vazio ou nulo
-        lastUpdatedTime || new Date().toLocaleTimeString() // Garantir que o lastUpdatedTime não seja nulo
-      );
+    if (!gpsEnabled) {
+      alert("GPS desativado. Não é possível iniciar o rastreamento.");
+      return;
+    }
+
+    setIsTracking((prevTracking) => !prevTracking); // Toggle the tracking state
+
+    if (!isTracking) {
+      // Start sending location updates when "Start" is clicked
+      const interval = setInterval(() => {
+        if (latitude && longitude && vehicleType && isTracking) {
+          sendLocationToServer(
+            latitude,
+            longitude,
+            currentAddress || "Desconhecido",
+            vehicleType || "Desconhecido",
+            lastUpdatedTime || new Date().toLocaleTimeString()
+          );
+        }
+      }, 50000); // Send every 50 seconds
+
+      setLocationUpdateInterval(interval); // Store interval reference
+    } else {
+      // Stop location updates when "Stop" is clicked
+      if (locationUpdateInterval) {
+        clearInterval(locationUpdateInterval); // Clear the interval
+        setLocationUpdateInterval(null);
+      }
     }
   };
+
+  useEffect(() => {
+    // Cleanup the interval if it's active
+    if (locationUpdateInterval) {
+      clearInterval(locationUpdateInterval);
+    }
+
+    return () => {
+      // Ensure the interval is cleared when the component is unmounted
+      if (locationUpdateInterval) {
+        clearInterval(locationUpdateInterval);
+      }
+    };
+  }, [locationUpdateInterval]); // Depends on the interval reference
 
   return (
     <View style={styles.container}>

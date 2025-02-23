@@ -1,4 +1,4 @@
-export function formatTime(value: string): string {
+export default function formatTime(value: string): string {
   let digitsOnly = value.replace(/\D/g, "");
 
   if (digitsOnly.length > 4) {

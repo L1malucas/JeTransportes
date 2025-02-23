@@ -1,37 +1,43 @@
 import { io } from "socket.io-client";
 
-// const socket = io("http://192.168.1.106:3001");
-const socket = io("https://jetransportes.onrender.com/");
+// Generate a unique client ID (you can use a more sophisticated method if needed)
+const generateClientId = () => {
+  // Example: create a unique client ID based on timestamp and a random number
+  return `${Date.now()}-${Math.floor(Math.random() * 10000)}`;
+};
 
-const getTimestamp = () => new Date().toLocaleString();
+// Connect to the server
+const socket = io("https://jetransportes.onrender.com/", {
+  transports: ["websocket", "polling"],
+  withCredentials: true,
+  reconnectionAttempts: 5,
+  reconnectionDelay: 1000,
+});
 
-export const sendLocationToServer = (
+// Get the unique client ID
+const clientId = generateClientId();
+
+// Function to send location data to the server
+const sendLocationToServer = (
   latitude: number,
   longitude: number,
   currentAddress: string,
   vehicleType: string,
   lastUpdatedTime: string
 ) => {
-  console.log(`[${getTimestamp()}] Enviando localização para o servidor:`, {
+  const locationData = {
+    clientId, // Attach the unique client ID to the data
     latitude,
     longitude,
-    currentAddress,
+    currentAddress: currentAddress || "Endereço não disponível", // Fallback to the last known address
     vehicleType,
     lastUpdatedTime,
-  });
+  };
 
-  socket.emit("location", {
-    latitude,
-    longitude,
-    currentAddress: currentAddress || "Endereço não disponível", // Fallback se o endereço for nulo
-    vehicleType: vehicleType || "Desconhecido", // Fallback se o tipo de veículo for nulo
-    lastUpdatedTime: lastUpdatedTime || new Date().toLocaleTimeString(), // Garantir que sempre tenha um horário
-  });
+  // Emit location data to the server
+  socket.emit("location", locationData);
+  console.log("Location data emitted:", locationData);
 };
 
-socket.on("locationUpdate", (data) => {
-  console.log(
-    `[${getTimestamp()}] Atualização de localização recebida no mobile:`,
-    data
-  );
-});
+// Example of how you could use it in the tracking component
+export default sendLocationToServer;
