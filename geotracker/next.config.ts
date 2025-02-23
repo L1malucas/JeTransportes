@@ -42,12 +42,6 @@ const nextConfig: NextConfig = {
     if (!isServer) {
       config.optimization.minimize = true;
     }
-    config.module.rules.push({
-      test: /\.(js|ts|tsx)$/,
-      enforce: "pre",
-      use: ["source-map-loader"],
-    });
-
     return config;
   },
   productionBrowserSourceMaps: false,
