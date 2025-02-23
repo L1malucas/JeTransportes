@@ -55,6 +55,36 @@ export default function Home() {
   };
 
   const renderVehicleCards = () => {
+    if (Object.keys(clientsInfo).length === 0) {
+      return (
+        <Card className="border-l-4 border-l-gray-500 cursor-not-allowed opacity-50">
+          <CardHeader className="pb-2">
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-xl">
+                Nenhuma informação disponível
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <MapPin className="h-5 w-5 text-gray-500 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-600">Sem informação de localização</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-gray-500 mt-1" />
+                <div>
+                  <p className="text-sm text-gray-600">Sem atualizações disponíveis</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      );
+    }
+
     return Object.keys(clientsInfo).map((clientId) => {
       const clientData = clientsInfo[clientId];
 
