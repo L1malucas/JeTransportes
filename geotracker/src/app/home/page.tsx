@@ -6,8 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:4001", {
-  // const socket = io("https://jetransportes.onrender.com/", {
+// const socket = io("http://localhost:4001", {
+const socket = io("https://jetransportes.onrender.com/", {
   transports: ["websocket", "polling"],
   withCredentials: true,
   reconnectionAttempts: 5,
