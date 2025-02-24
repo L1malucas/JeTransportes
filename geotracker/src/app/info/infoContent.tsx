@@ -73,7 +73,7 @@ export default function InfoContent() {
                 <div>
                   <p className="font-medium">Contato (Linkedin)</p>
                   <p className="text-sm text-gray-600">
-                    linkedin.com/in/lucasl1ma/
+                    linkedin.com/in/lucaslimacoder/
                   </p>
                 </div>
               </div>
