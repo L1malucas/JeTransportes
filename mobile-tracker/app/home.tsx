@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { Play, Pause, Clock } from "lucide-react-native";
 import { styles } from "./styles/styles";
 import useLocationTracker from "./hooks/useCurrentLocation";
 import LocationTrackerCard from "./components/LocationTrackerCard";
 import formatTime from "./utils/timeInput";
-import sendLocationToServer from "./services/socketService"; // Updated to include clientId
 
 const WorkTrackingApp: React.FC = () => {
   const [vehicleType, setVehicleType] = useState("");
@@ -13,8 +12,6 @@ const WorkTrackingApp: React.FC = () => {
   const [showSchedule, setShowSchedule] = useState(false);
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [locationUpdateInterval, setLocationUpdateInterval] =
-    useState<NodeJS.Timeout | null>(null);
 
   const {
     currentAddress,
@@ -27,7 +24,7 @@ const WorkTrackingApp: React.FC = () => {
     updateIntervalMs: 30000,
     checkStatusIntervalMs: 5000,
     vehicleType,
-    isTracking, 
+    isTracking,
   });
 
   const canStartStop = vehicleType.trim() !== "";
@@ -48,49 +45,11 @@ const WorkTrackingApp: React.FC = () => {
 
   const handleSubmit = () => {
     if (!gpsEnabled) {
-      alert("GPS desativado. Não é possível iniciar o rastreamento.");
+      alert("GPS disabled. Cannot start tracking.");
       return;
     }
-
-    setIsTracking((prevTracking) => !prevTracking); // Toggle the tracking state
-
-    if (!isTracking) {
-      // Start sending location updates when "Start" is clicked
-      const interval = setInterval(() => {
-        if (latitude && longitude && vehicleType && isTracking) {
-          sendLocationToServer(
-            latitude,
-            longitude,
-            currentAddress || "Desconhecido",
-            vehicleType || "Desconhecido",
-            lastUpdatedTime || new Date().toLocaleTimeString()
-          );
-        }
-      }, 50000); // Send every 50 seconds
-
-      setLocationUpdateInterval(interval); // Store interval reference
-    } else {
-      // Stop location updates when "Stop" is clicked
-      if (locationUpdateInterval) {
-        clearInterval(locationUpdateInterval); // Clear the interval
-        setLocationUpdateInterval(null);
-      }
-    }
+    setIsTracking((prev) => !prev);
   };
-
-  useEffect(() => {
-    // Cleanup the interval if it's active
-    if (locationUpdateInterval) {
-      clearInterval(locationUpdateInterval);
-    }
-
-    return () => {
-      // Ensure the interval is cleared when the component is unmounted
-      if (locationUpdateInterval) {
-        clearInterval(locationUpdateInterval);
-      }
-    };
-  }, [locationUpdateInterval]); // Depends on the interval reference
 
   return (
     <View style={styles.container}>
@@ -102,15 +61,15 @@ const WorkTrackingApp: React.FC = () => {
       />
 
       <View style={styles.card}>
-        <Text style={styles.title}>Iniciar as Viagens</Text>
+        <Text style={styles.title}>Start Trips</Text>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Digite o tipo do veículo</Text>
+          <Text style={styles.label}>Enter vehicle type</Text>
           <TextInput
             value={vehicleType}
             onChangeText={setVehicleType}
             style={styles.input}
-            placeholder="Ex.: Ônibus, Van, Micro-ônibus"
+            placeholder="E.g., Bus, Van, Minibus"
           />
         </View>
 
@@ -123,10 +82,8 @@ const WorkTrackingApp: React.FC = () => {
               { marginRight: 8 },
             ]}
           >
-            <Text
-              style={!showSchedule ? styles.activeText : styles.inactiveText}
-            >
-              Tempo Real
+            <Text style={!showSchedule ? styles.activeText : styles.inactiveText}>
+              Real-Time
             </Text>
           </TouchableOpacity>
 
@@ -137,10 +94,8 @@ const WorkTrackingApp: React.FC = () => {
               showSchedule ? styles.activeButton : styles.inactiveButton,
             ]}
           >
-            <Text
-              style={showSchedule ? styles.activeText : styles.inactiveText}
-            >
-              Agendar
+            <Text style={showSchedule ? styles.activeText : styles.inactiveText}>
+              Schedule
             </Text>
           </TouchableOpacity>
         </View>
@@ -148,7 +103,7 @@ const WorkTrackingApp: React.FC = () => {
         {showSchedule ? (
           <View>
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Horário de Início</Text>
+              <Text style={styles.label}>Start Time</Text>
               <TextInput
                 value={startTime}
                 onChangeText={handleStartTimeChange}
@@ -160,7 +115,7 @@ const WorkTrackingApp: React.FC = () => {
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={styles.label}>Horário de Término</Text>
+              <Text style={styles.label}>End Time</Text>
               <TextInput
                 value={endTime}
                 onChangeText={handleEndTimeChange}
@@ -177,7 +132,7 @@ const WorkTrackingApp: React.FC = () => {
                 style={[styles.submitButton, styles.scheduleButton]}
               >
                 <Clock size={20} color="white" />
-                <Text style={styles.buttonText}> Confirmar Horário</Text>
+                <Text style={styles.buttonText}> Confirm Schedule</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -193,12 +148,12 @@ const WorkTrackingApp: React.FC = () => {
               {isTracking ? (
                 <>
                   <Pause size={20} color="white" />
-                  <Text style={styles.buttonText}> Parar</Text>
+                  <Text style={styles.buttonText}> Stop</Text>
                 </>
               ) : (
                 <>
                   <Play size={20} color="white" />
-                  <Text style={styles.buttonText}> Iniciar</Text>
+                  <Text style={styles.buttonText}> Start</Text>
                 </>
               )}
             </TouchableOpacity>
