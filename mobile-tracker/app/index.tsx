@@ -1,5 +1,5 @@
-import WorkTrackingApp from "./home";
+import MainScreen from "./screens/MainScreen";
 
 export default function Index() {
-  return <WorkTrackingApp />;
+  return <MainScreen />;
 }
